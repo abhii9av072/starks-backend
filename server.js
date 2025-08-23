@@ -2,11 +2,11 @@ import express from "express";
 import cors from "cors";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
-import { logToDiscord } from "./utils/logger.js";  // ✅
 
 import membersRoutes from "./routes/members.js";
 import projectsRoutes from "./routes/projects.js";
 import reportsRoutes from "./routes/reports.js";
+import { logToDiscord } from "./utils/logger.js";  // ✅ import logger
 
 dotenv.config();
 
@@ -14,18 +14,22 @@ const app = express();
 app.use(express.json({ limit: "27mb" }));
 app.use(cors({ origin: process.env.CORS_ORIGIN?.split(",") || "*" }));
 
-// Middleware to log every request
+// ✅ Middleware: Log every request
 app.use((req, res, next) => {
-  logToDiscord(`📥 Request: **${req.method}** ${req.originalUrl}`);
+  const logMsg = `📡 [${req.method}] ${req.originalUrl} from ${req.ip}`;
+  console.log(logMsg);
+  logToDiscord(logMsg);
   next();
 });
 
 app.get("/", (req, res) => {
-  res.send("StarksHUB API is running");
-  logToDiscord("✅ Root endpoint hit (`/`)");
+  const msg = "✅ StarksHUB API is running (Frontend Connected)";
+  console.log(msg);
+  logToDiscord(msg);
+  res.send(msg);
 });
 
-// Mount routes
+// ✅ mount routes
 app.use("/api/members", membersRoutes);
 app.use("/api/projects", projectsRoutes);
 app.use("/api/reports", reportsRoutes);
@@ -35,29 +39,28 @@ const PORT = process.env.PORT || 8080;
 mongoose
   .connect(process.env.MONGODB_URI)
   .then(() => {
-    app.listen(PORT, () => {
-      const msg = `🚀 API running on port ${PORT} (public: ${process.env.PUBLIC_URL || "set PUBLIC_URL env"})`;
-      console.log(msg);
-      logToDiscord(msg);
-    });
+    const msg = `🚀 API running on http://localhost:${PORT}`;
+    console.log(msg);
+    logToDiscord(msg);
+    app.listen(PORT, () => console.log(msg));
   })
   .catch((e) => {
-    const msg = `❌ MongoDB connection error: ${e.message}`;
-    console.error(msg);
-    logToDiscord(msg);
+    const errMsg = `❌ MongoDB connection error: ${e.message}`;
+    console.error(errMsg);
+    logToDiscord(errMsg);
     process.exit(1);
   });
 
-import { logToDiscord } from "./utils/logger.js";
-
 // 🔴 Handle uncaught exceptions
 process.on("uncaughtException", (err) => {
-  logToDiscord(`💥 **Uncaught Exception:** ${err.message}\n\`\`\`${err.stack}\`\`\``);
-  console.error("Uncaught Exception:", err);
+  const msg = `💥 Uncaught Exception: ${err.message}\n\`\`\`${err.stack}\`\`\``;
+  console.error(msg);
+  logToDiscord(msg);
 });
 
 // ⚠️ Handle unhandled promise rejections
 process.on("unhandledRejection", (reason, promise) => {
-  logToDiscord(`⚠️ **Unhandled Rejection:** ${reason instanceof Error ? reason.message : reason}`);
-  console.error("Unhandled Rejection at:", promise, "reason:", reason);
+  const msg = `⚠️ Unhandled Rejection: ${reason instanceof Error ? reason.message : reason}`;
+  console.error(msg);
+  logToDiscord(msg);
 });
