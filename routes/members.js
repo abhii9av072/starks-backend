@@ -1,31 +1,52 @@
-import { Router } from 'express';
-import Member from '../models/Member.js';
+import express from "express";
+import Member from "../models/Member.js";
+import { logDB } from "../utils/logger.js";
 
-const router = Router();
+const router = express.Router();
 
-// Get all members
-router.get('/', async (req, res) => {
-  const members = await Member.find().sort({ createdAt: 1 });
-  res.json(members);
+// CREATE
+router.post("/", async (req, res) => {
+  try {
+    const newMember = new Member(req.body);
+    await newMember.save();
+    logDB("CREATE", "Member", req.body);
+    res.status(201).json(newMember);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
-// Create member – enforce max 5
-router.post('/', async (req, res) => {
-  const count = await Member.countDocuments();
-  if (count >= 5) return res.status(400).json({ message: 'Maximum of 5 members reached' });
-
-  const { name, klass, skills, bio, avatar } = req.body;
-  if (!name || !klass || !skills || !bio)
-    return res.status(400).json({ message: 'Missing fields' });
-
-  const created = await Member.create({ name, klass, skills, bio, avatar });
-  res.status(201).json(created);
+// READ
+router.get("/", async (req, res) => {
+  try {
+    const members = await Member.find();
+    logDB("READ", "Member", { count: members.length });
+    res.json(members);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
-// Delete member
-router.delete('/:id', async (req, res) => {
-  await Member.findByIdAndDelete(req.params.id);
-  res.json({ ok: true });
+// UPDATE
+router.put("/:id", async (req, res) => {
+  try {
+    const updated = await Member.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    logDB("UPDATE", "Member", updated);
+    res.json(updated);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// DELETE
+router.delete("/:id", async (req, res) => {
+  try {
+    const deleted = await Member.findByIdAndDelete(req.params.id);
+    logDB("DELETE", "Member", deleted);
+    res.json({ message: "Member deleted" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 export default router;
