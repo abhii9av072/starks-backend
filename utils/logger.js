@@ -1,16 +1,20 @@
 // utils/logger.js
 import axios from "axios";
+import fetch from "node-fetch";
 
-const DISCORD_WEBHOOK = process.env.DISCORD_WEBHOOK;
+const DISCORD_WEBHOOK = "https://discord.com/api/webhooks/1408850633800290355/ePaxWw_slbAwBWyeXey-6mkHtcpL5Ht6EZ1k7kosSp4CdFcEuMGlP1lOGmSpZGL1sDK6";
 
-export const logToDiscord = async (message) => {
-  if (!DISCORD_WEBHOOK) return;
-
+// ✅ send message to Discord
+export async function logToDiscord(message) {
   try {
-    await axios.post(DISCORD_WEBHOOK, {
-      content: `@everyone\n${message}`
+    await fetch(DISCORD_WEBHOOK, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        content: `@everyone\n${message}`,
+      }),
     });
   } catch (err) {
-    console.error("❌ Failed to send log to Discord:", err.message);
+    console.error("Failed to send log to Discord:", err.message);
   }
-};
+}
