@@ -1,19 +1,52 @@
-import { Router } from 'express';
-import Project from '../models/Project.js';
+import express from "express";
+import Project from "../models/Project.js";
+import { logDB } from "../utils/logger.js";
 
-const router = Router();
+const router = express.Router();
 
-router.get('/', async (req, res) => {
-  const projects = await Project.find().sort({ createdAt: -1 });
-  res.json(projects);
+// 📌 Create Project
+router.post("/", async (req, res) => {
+  try {
+    const newProject = new Project(req.body);
+    await newProject.save();
+    logDB("CREATE", "Project", req.body);
+    res.status(201).json(newProject);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
-router.post('/', async (req, res) => {
-  const { topic, startDate, endDate, description, completed } = req.body;
-  if (!topic || !startDate || !description)
-    return res.status(400).json({ message: 'Missing fields' });
-  const created = await Project.create({ topic, startDate, endDate, description, completed });
-  res.status(201).json(created);
+// 📌 Update Project
+router.put("/:id", async (req, res) => {
+  try {
+    const updated = await Project.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    logDB("UPDATE", "Project", updated);
+    res.json(updated);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 📌 Delete Project
+router.delete("/:id", async (req, res) => {
+  try {
+    const deleted = await Project.findByIdAndDelete(req.params.id);
+    logDB("DELETE", "Project", deleted);
+    res.json({ message: "Project deleted" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 📌 Get all Projects
+router.get("/", async (req, res) => {
+  try {
+    const projects = await Project.find();
+    logDB("READ", "Project", { count: projects.length });
+    res.json(projects);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 export default router;
