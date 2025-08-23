@@ -4,7 +4,7 @@ import { logDB } from "../utils/logger.js";
 
 const router = express.Router();
 
-// 📌 Create Project
+// CREATE
 router.post("/", async (req, res) => {
   try {
     const newProject = new Project(req.body);
@@ -16,7 +16,18 @@ router.post("/", async (req, res) => {
   }
 });
 
-// 📌 Update Project
+// READ
+router.get("/", async (req, res) => {
+  try {
+    const projects = await Project.find();
+    logDB("READ", "Project", { count: projects.length });
+    res.json(projects);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// UPDATE
 router.put("/:id", async (req, res) => {
   try {
     const updated = await Project.findByIdAndUpdate(req.params.id, req.body, { new: true });
@@ -27,23 +38,12 @@ router.put("/:id", async (req, res) => {
   }
 });
 
-// 📌 Delete Project
+// DELETE
 router.delete("/:id", async (req, res) => {
   try {
     const deleted = await Project.findByIdAndDelete(req.params.id);
     logDB("DELETE", "Project", deleted);
     res.json({ message: "Project deleted" });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// 📌 Get all Projects
-router.get("/", async (req, res) => {
-  try {
-    const projects = await Project.find();
-    logDB("READ", "Project", { count: projects.length });
-    res.json(projects);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
