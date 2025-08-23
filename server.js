@@ -47,3 +47,17 @@ mongoose
     logToDiscord(msg);
     process.exit(1);
   });
+
+import { logToDiscord } from "./utils/logger.js";
+
+// 🔴 Handle uncaught exceptions
+process.on("uncaughtException", (err) => {
+  logToDiscord(`💥 **Uncaught Exception:** ${err.message}\n\`\`\`${err.stack}\`\`\``);
+  console.error("Uncaught Exception:", err);
+});
+
+// ⚠️ Handle unhandled promise rejections
+process.on("unhandledRejection", (reason, promise) => {
+  logToDiscord(`⚠️ **Unhandled Rejection:** ${reason instanceof Error ? reason.message : reason}`);
+  console.error("Unhandled Rejection at:", promise, "reason:", reason);
+});
