@@ -24,7 +24,7 @@ router.get("/", async (req, res) => {
   }
 });
 
-// ✅ Get single report by ID
+// ✅ Get single report
 router.get("/:id", async (req, res) => {
   try {
     const report = await Report.findById(req.params.id);
@@ -35,7 +35,7 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-// ✅ Update report by ID
+// ✅ Update report
 router.put("/:id", async (req, res) => {
   try {
     const updated = await Report.findByIdAndUpdate(req.params.id, req.body, {
@@ -48,7 +48,27 @@ router.put("/:id", async (req, res) => {
   }
 });
 
-// ✅ Delete report by ID
+// ✅ Mark as completed
+router.patch("/:id/complete", async (req, res) => {
+  try {
+    const report = await Report.findById(req.params.id);
+    if (!report) return res.status(404).json({ message: "Report not found" });
+
+    if (report.completed) {
+      return res.status(400).json({ message: "Report already completed" });
+    }
+
+    report.completed = true;
+    report.completedAt = new Date();
+    await report.save();
+
+    res.json(report);
+  } catch (error) {
+    res.status(500).json({ message: "Error marking report complete", error });
+  }
+});
+
+// ✅ Delete report
 router.delete("/:id", async (req, res) => {
   try {
     const deleted = await Report.findByIdAndDelete(req.params.id);
