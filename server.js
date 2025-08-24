@@ -11,12 +11,16 @@ app.use(cors());
 app.use(express.json());
 
 // ✅ MongoDB connection
-mongoose.connect(process.env.MONGODB_URL, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-})
+mongoose.connect(
+  process.env.MONGODB_URL || "mongodb+srv://abhii9av072:8jwwqlcGYs7lzafu@starksdb.jo4egap.mongodb.net/?retryWrites=true&w=majority&appName=StarksDB",
+  {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  }
+)
 .then(() => console.log("✅ MongoDB connected"))
 .catch((err) => console.error("❌ MongoDB error:", err));
+
 
 // ✅ Report schema
 const reportSchema = new mongoose.Schema({
@@ -77,3 +81,4 @@ app.delete("/api/reports/:id", async (req, res) => {
 // ✅ Start server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+console.log("MONGODB_URL from env:", process.env.MONGODB_URL ? "✅ Loaded" : "❌ Missing");
