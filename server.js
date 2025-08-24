@@ -41,12 +41,3 @@ mongoose
     process.exit(1);
   });
 
-const reportSchema = new mongoose.Schema({
-  title: { type: String, required: true },
-  description: String,
-  author: String,
-  createdAt: { type: Date, default: Date.now },
-  completedAt: { type: Date, default: null },
-  completed: { type: Boolean, default: false }
-});
-
