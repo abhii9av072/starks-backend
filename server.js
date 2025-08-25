@@ -27,7 +27,7 @@ const reportSchema = new mongoose.Schema({
   title: { type: String, required: true },
   description: { type: String, default: "" },
   author: { type: String, default: "Anonymous" },
-  completed: { type: Boolean, default: false },
+  completed: { type: Boolean, default: true },
 }, { timestamps: true });
 
 const Report = mongoose.model("Report", reportSchema);
@@ -82,3 +82,4 @@ app.delete("/api/reports/:id", async (req, res) => {
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
 console.log("MONGODB_URL from env:", process.env.MONGODB_URL ? "✅ Loaded" : "❌ Missing");
+
